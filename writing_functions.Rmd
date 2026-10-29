@@ -98,6 +98,70 @@ z_scores = function(x) {
 }
 ```
 
+## Mean and SD
+
+```{r}
+mean(x_vec)
+sd(x_vec)
+```
+
+Write a function that returns mean and sd of an input vector 
+```{r eval = F}
+ mean_and_sd = function(x) {
+  
+  return_df = 
+    tibble(
+      mean = mean(x),
+      sd = sd(x)
+    )
+  
+  return(return_df)
+}
+```
+
+Check that it works
+```{r}
+mean_and_sd(x_vec)
+```
+
+Making a new folder and R script and paste function in there --> easier to keep track of functions in separate folder, don't put functions in main Rmd usually. insert roxygen skeleton 
+
+```{r}
+source("source/mean_and_sd.R")
+```
+
+## Another function 
+
+```{r}
+sim_df = 
+  tibble(
+    x = rnorm(n = 40, mean = 12, sd = 3)
+  )
+
+sim_df |> 
+  summarize(
+    mean = mean(x), 
+    sd = sd(x)
+  )
+```
+function in new R script. mu = true population mean, sigma = true population SD 
+
+
+```{r}
+source("source/sim_mean_sd.R")
+```
+
+```{r}
+sim_mean_sd(n_obs = 40, mu = 12, sigma = 3) 
+
+sim_mean_sd(40, 12, 3)
+```
+R uses positional matching if you put numbers in right order 
+
+Can use default values in R script, set function 'sim_mean_sd = function(n_obs, mu = 12, sigma = 3) {' and then can just enter one value into function call, and R will automatically assume the number is for n_obs 
+
+
+
 
 
 
