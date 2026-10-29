@@ -1,0 +1,16 @@
+---
+title: "writing_functions"
+author: "Emma"
+date: "2026-10-29"
+output: github_document
+---
+
+If you use the same code more than twice, write a function 
+
+```{r message = F}
+library(tidyverse)
+library(rvest)
+
+set.seed(1)
+```
+
