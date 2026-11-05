@@ -609,3 +609,108 @@ nsduh_df |>
 ```
 
 <img src="iteration_and_listcols_files/figure-gfm/unnamed-chunk-20-1.png" alt="" width="90%" />
+
+### weather again?
+
+``` r
+data("weather_df") 
+
+weather_df = 
+  weather_df |> 
+  nest(data = date:tmin) #takes everything and collapses 
+```
+
+What if i want to do a regression of tmax on tmin for each station?
+
+``` r
+lm(tmax ~ tmin, data = pull(weather_df, data) [[1]]) #pulling first col from weather df, then run linear model on it 
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = tmax ~ tmin, data = pull(weather_df, data)[[1]])
+    ## 
+    ## Coefficients:
+    ## (Intercept)         tmin  
+    ##       7.514        1.034
+
+``` r
+lm(tmax ~ tmin, data = pull(weather_df, data) [[2]]) #second column (different station)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = tmax ~ tmin, data = pull(weather_df, data)[[2]])
+    ## 
+    ## Coefficients:
+    ## (Intercept)         tmin  
+    ##     21.7547       0.3222
+
+``` r
+lm(tmax ~ tmin, data = pull(weather_df, data) [[3]]) 
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = tmax ~ tmin, data = pull(weather_df, data)[[3]])
+    ## 
+    ## Coefficients:
+    ## (Intercept)         tmin  
+    ##       7.532        1.137
+
+``` r
+weather_lm = function(input_data) {
+  
+  lm(tmax ~ tmin, data = input_data)
+  
+}
+
+weather_lm(pull(weather_df, data) [[1]]) #wrote a new function, applying to this data set 
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = tmax ~ tmin, data = input_data)
+    ## 
+    ## Coefficients:
+    ## (Intercept)         tmin  
+    ##       7.514        1.034
+
+``` r
+# use map statement to fit lm function to each column of weather df, output in new col 
+
+weather_df |> 
+  mutate(
+    lm_fits = map(data, weather_lm)
+  ) |> 
+  pull(lm_fits) #to check if it works, don't always have to do this 
+```
+
+    ## [[1]]
+    ## 
+    ## Call:
+    ## lm(formula = tmax ~ tmin, data = input_data)
+    ## 
+    ## Coefficients:
+    ## (Intercept)         tmin  
+    ##       7.514        1.034  
+    ## 
+    ## 
+    ## [[2]]
+    ## 
+    ## Call:
+    ## lm(formula = tmax ~ tmin, data = input_data)
+    ## 
+    ## Coefficients:
+    ## (Intercept)         tmin  
+    ##     21.7547       0.3222  
+    ## 
+    ## 
+    ## [[3]]
+    ## 
+    ## Call:
+    ## lm(formula = tmax ~ tmin, data = input_data)
+    ## 
+    ## Coefficients:
+    ## (Intercept)         tmin  
+    ##       7.532        1.137

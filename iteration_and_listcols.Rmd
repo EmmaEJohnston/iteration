@@ -285,6 +285,43 @@ nsduh_df |>
   facet_grid(. ~ drug) #can also plot this stuff! 
 ```
 
+### weather again? 
+
+```{r}
+data("weather_df") 
+
+weather_df = 
+  weather_df |> 
+  nest(data = date:tmin) #takes everything and collapses 
+```
+
+What if i want to do a regression of tmax on tmin for each station?
+
+```{r}
+lm(tmax ~ tmin, data = pull(weather_df, data) [[1]]) #pulling first col from weather df, then run linear model on it 
+lm(tmax ~ tmin, data = pull(weather_df, data) [[2]]) #second column (different station)
+lm(tmax ~ tmin, data = pull(weather_df, data) [[3]]) 
+```
+
+```{r}
+weather_lm = function(input_data) {
+  
+  lm(tmax ~ tmin, data = input_data)
+  
+}
+
+weather_lm(pull(weather_df, data) [[1]]) #wrote a new function, applying to this data set 
+
+# use map statement to fit lm function to each column of weather df, output in new col 
+
+weather_df |> 
+  mutate(
+    lm_fits = map(data, weather_lm)
+  ) |> 
+  pull(lm_fits) #to check if it works, don't always have to do this 
+```
+
+
 
 
 
