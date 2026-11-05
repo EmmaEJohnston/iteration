@@ -162,7 +162,128 @@ output = map_df(list_norm, median) #simplifying outputs if you want, putting int
 output = map_dbl(list_norm, median) #putting in a vector, doesn't separate out into list
 ```
 
+## list columns 
 
+```{r}
+listcol_df = 
+  tibble(
+    name = c("a", "b", "c", "d"), 
+    samp = list_norm #this is a legit list we made 
+  )
+
+listcol_df
+```
+this will be a df and one of the columns will be a list, items in that column are collections of 20 numbers
+
+do stuff with it 
+
+```{r}
+listcol_df |> 
+  filter(name == "a")
+```
+
+```{r}
+listcol_df |> 
+  filter(name %in% c("a", "c", "d"))
+
+listcol_df |> 
+  pull(samp)
+```
+
+mean and sd 
+
+```{r}
+mean_and_sd(pull(listcol_df, samp)[[1]]) #this is ugly do not do this 
+```
+
+could i iterate?
+
+```{r}
+#pull(listcol_df, samp) #this is still an input list, iterate across this input list and apply mean and sd function and save result
+
+map(pull(listcol_df, samp), mean_and_sd)
+```
+Jeff hates pulling stuff out of a df, ideally we would keep it in df and put results in another df 
+
+do this instead: 
+mutate to add a column
+```{r}
+listcol_df |> 
+  mutate(
+    output = map(samp, mean_and_sd) #adding output column, do map, mean/sd function across samp column, within listcol pipe  
+  )
+
+listcol_df |> 
+  mutate(
+    output = map_df(samp, mean_and_sd)
+  ) #inside new column, there is a dataframe 
+
+listcol_df |> 
+  mutate(
+    output = map_dbl(samp, median)
+  )
+```
+
+## another example 
+
+NSDUH import etc 
+
+```{r}
+nsduh_url = "https://www.samhsa.gov/data/sites/default/files/NSDUHsaeShortTermCHG2015/NSDUHsaeShortTermCHG2015.htm"
+
+nsduh_html = read_html(nsduh_url)
+
+nsduh_process(html = nsduh_html, table_num = 1)
+nsduh_process(html = nsduh_html, table_num = 4)
+nsduh_process(html = nsduh_html, table_num = 5)
+```
+
+import using iteration 
+
+```{r}
+output = vector("list", length = 3)
+
+table_nums = c(1, 4, 5) #keeping track of which tables we care about, indexed i as 1:3 in for loop
+
+for (i in 1:3) {
+  
+  output[[i]] = nsduh_process(html = nsduh_html, table_num = table_nums[i])
+  
+}
+
+#gets a little confusing because output tables are now numbered differently than input tables, have to keep track 
+```
+
+Use map statements when you can on homeworks, not for loops!!! 
+
+same process, import using map statement instead 
+
+```{r}
+map(table_nums, nsduh_process, html = nsduh_html) #what am i mapping across, what function am i doing, any additional arguments this function needs 
+```
+Exact same output! 
+
+Now use list columns to do same thing 
+
+```{r}
+nsduh_df = 
+  tibble(
+    drug = c("marj", "cocaine", "heroin"), 
+    num = c(1, 4, 5)
+  ) |>  #want to add each output to a new column 
+  mutate( 
+    table = map(num, nsduh_process, html = nsduh_html)
+    ) |> #adding column that maps across new num variable aka the tables, using the function and specifying the function argument 
+  select(-num) |> 
+  unnest(table) #unnest, expanding out all sub dataframes
+
+nsduh_df |> 
+  filter(age == "12-17") |> 
+  mutate(State = fct_reorder(State, percent)) |> 
+  ggplot(aes(x = State, y = percent, color = year)) +
+  geom_point() +
+  facet_grid(. ~ drug) #can also plot this stuff! 
+```
 
 
 
