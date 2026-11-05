@@ -50,9 +50,109 @@ keeping everything in one dataframe with list columns means there are fewer thin
 ```{r}
 library(tidyverse)
 library(rvest)
+library(p8105.datasets)
 ```
 
 ```{r}
-set.seed(1)
+source("source/mean_and_sd.R")
+source("source/nsduh_process.R")
 ```
+
+```{r}
+set.seed(1236)
+```
+
+```{r}
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+## Lists 
+
+Prove that lists can have anything 
+
+```{r}
+l = list(
+  vec_numeric = 5:17, 
+  mat = matrix(1:8, nrow = 2, ncol = 4, byrow = TRUE), 
+  vec_logical = c(TRUE), 
+  summary_table = summary(rnorm(1000))
+)
+
+l 
+
+l[[1]]
+
+l[[2]]
+
+l[["vec_logical"]]
+
+l$summary_table #don't do this, shorthand for brackets 
+```
+
+# `for` loops 
+
+```{r}
+# create input list first 
+list_norm = list(
+  a = rnorm(20, 3, 4),
+  b = rnorm(20, -14, 20),
+  c = rnorm(20, 1000, 1000),
+  d  = rnorm(20, 0, 1)
+) 
+```
+
+Can I get mean and sd for each sample?
+Use function we wrote last time 
+
+```{r}
+mean_and_sd(list_norm[[1]])
+mean_and_sd(list_norm[[2]])
+mean_and_sd(list_norm[[3]])
+mean_and_sd(list_norm[[4]])
+
+# pull out specific item in list, then apply that function 
+# already tedious to deal with four of these --> write a for loop! 
+```
+
+Doing this better with a for loop: 
+
+```{r}
+#define an empty list for a space for each output I care about, length = 4 because we're working with four variables  
+output = vector("list", length = 4) 
+
+for (i in 1:4) { #go through 1, 2, 3, 4, put outputs of function on list norm into new list called output
+  
+  output[[i]] = mean_and_sd(list_norm[[i]])
+  
+}
+
+output #empty list you made is now filled with the output from the for loop 
+```
+
+## `map` instead
+
+```{r}
+
+```
+
+
+
+
+
+
+
 
