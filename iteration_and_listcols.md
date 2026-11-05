@@ -259,4 +259,21 @@ output #empty list you made is now filled with the output from the for loop
     ##     <dbl> <dbl>
     ## 1 -0.0560  1.09
 
-## `map` instead
+## use `map` instead
+
+Take for loop and modify it
+
+``` r
+output = map(list_norm, mean_and_sd) #where we save output = (input list, function I care about)
+output = map(list_norm, median) #can use map and change what function you apply 
+
+#regular map always gives you a list 
+```
+
+## Map variants
+
+``` r
+output = map_df(list_norm, median) #simplifying outputs if you want, putting into df 
+
+output = map_dbl(list_norm, median) #putting in a vector, doesn't separate out into list
+```
