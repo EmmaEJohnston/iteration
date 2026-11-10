@@ -52,6 +52,7 @@ set.seed(1)
 
 ``` r
 source("source/sim_mean_sd.R")
+source("source/sim_slr.R")
 ```
 
 ``` r
@@ -162,7 +163,7 @@ sim_results_df =
 ```
 
 ``` r
-sim_results_df = 
+sim_results_df = # {r cache = TRUE} doesn't re run every time you knit, just saves result once. helpful if going slowly
   expand_grid(
     samp_size = c(30, 60, 120, 240), #making more options for combos, running same thing a bunch of times
     iter = 1:1000
@@ -184,3 +185,110 @@ sim_results_df |>
 ```
 
 <img src="simulation_files/figure-gfm/unnamed-chunk-12-1.png" alt="" width="90%" />
+
+Look at the numbers
+
+``` r
+sim_results_df |> 
+  mutate(
+    samp_size = str_c("n = ", samp_size), 
+    samp_size = fct_inorder(samp_size)
+  ) |> 
+  group_by(samp_size) |> 
+  summarize(
+    emp_m = mean(mean), 
+    emp_se = sd(mean)
+  )
+```
+
+    ## # A tibble: 4 × 3
+    ##   samp_size emp_m emp_se
+    ##   <fct>     <dbl>  <dbl>
+    ## 1 n = 30     12.0  0.544
+    ## 2 n = 60     12.0  0.387
+    ## 3 n = 120    12.0  0.283
+    ## 4 n = 240    12.0  0.195
+
+# SLR!! Regression
+
+Generate once
+
+``` r
+sim_data = 
+  tibble(
+    x = rnorm(30, mean = 1, sd = 1), 
+    y = 2 + 3 * x + rnorm(30, mean = 0, sd = 1)
+  )
+
+#sim_data |> 
+ # ggplot(aes(x = x, y = y)) +
+ # geom_point() +
+ # geom_smooth(method = "lm", se = FALSE)
+
+fit = lm(y ~ x, data = sim_data)
+```
+
+Write a function that generates the data, gives me the outputs I care
+about. then do it a bunch of times.
+
+Function is now in source file - use to run over and over
+
+this works once:
+
+``` r
+sim_slr(30)
+```
+
+    ## # A tibble: 1 × 2
+    ##   beta0_hat beta1_hat
+    ##       <dbl>     <dbl>
+    ## 1      2.00      3.20
+
+this works a lot of times:
+
+``` r
+slr_results_df = 
+  tibble(
+    samp_size = rep(30, 1000)
+  ) |> 
+  mutate(
+    est_df = map(samp_size, sim_slr)
+  ) |> 
+  unnest(est_df)
+```
+
+is this right?
+
+``` r
+slr_results_df |> 
+  summarize(
+    b0_mean = mean(beta0_hat), 
+    b0_se = sd(beta0_hat)
+  )
+```
+
+    ## # A tibble: 1 × 2
+    ##   b0_mean b0_se
+    ##     <dbl> <dbl>
+    ## 1    2.01 0.261
+
+look at results
+
+``` r
+slr_results_df |> 
+  ggplot(aes(x = beta0_hat)) +
+  geom_density()
+```
+
+<img src="simulation_files/figure-gfm/unnamed-chunk-18-1.png" alt="" width="90%" />
+Check it is normally distributed - sometimes samp size won’t be big
+enough to be normally distributed
+
+``` r
+slr_results_df |> 
+  ggplot(aes(x = beta0_hat, y = beta1_hat)) +
+  geom_point()
+```
+
+<img src="simulation_files/figure-gfm/unnamed-chunk-19-1.png" alt="" width="90%" />
+they’re correlated!
