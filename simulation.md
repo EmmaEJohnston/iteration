@@ -53,6 +53,7 @@ set.seed(1)
 ``` r
 source("source/sim_mean_sd.R")
 source("source/sim_slr.R")
+source("source/birthday_repeated.R")
 ```
 
 ``` r
@@ -292,3 +293,60 @@ slr_results_df |>
 
 <img src="simulation_files/figure-gfm/unnamed-chunk-19-1.png" alt="" width="90%" />
 they’re correlated!
+
+# birthday problem
+
+``` r
+birthdays = sample(1:365, size = 5, replace = TRUE) #drawing 5 birthdays, replace = TRUE means you can redraw same number more than once 
+
+repeated_birthdays = length(unique(birthdays)) < 5 
+
+repeated_birthdays #no repeated bdays in a room with 5 people 
+```
+
+    ## [1] FALSE
+
+want to do this a bunch of times, make function
+
+``` r
+birthday_repeated(147)
+```
+
+    ## [1] TRUE
+
+run it a bunch
+
+``` r
+birthday_results_df = 
+  tibble(
+    number_of_people = rep(5, 10)
+  ) |> 
+  mutate(
+    repeated = map_lgl(number_of_people, birthday_repeated) #logical output, simplify with map_lgl
+  )
+```
+
+``` r
+birthday_results_df = 
+  expand_grid(
+    number_of_people = 5:50, #want to look at different sizes of group and compare
+    iter = 1:1000 #1000 5s, 1000 6s, etc all numbered 1 - 1000 
+  ) |> 
+  mutate(
+    repeated = map_lgl(number_of_people, birthday_repeated) #logical output, simplify with map_lgl
+  )
+```
+
+look at results - on average, how many times was it TRUE/F in each group
+size?
+
+``` r
+birthday_results_df |> 
+  group_by(number_of_people) |> 
+  summarize(prob_of_repeat = mean(repeated)) |> 
+  ggplot(aes(x = number_of_people, y = prob_of_repeat)) +
+  geom_point() +
+  geom_line()
+```
+
+<img src="simulation_files/figure-gfm/unnamed-chunk-24-1.png" alt="" width="90%" />
