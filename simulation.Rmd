@@ -1,0 +1,36 @@
+---
+title: "simulation"
+author: "Emma"
+date: "2026-11-10"
+output: github_document
+---
+## Repeated sampling
+
+repeatedly draw random samples of the same size from a population. compute the mean for each sample --> distribution of sample means converges to a normal distribution 
+
+We simulate this on a computer 
+
+Basic idea of simulations is to generate repeated samples under a process you design --> check things are working the way they are supposed to 
+
+* define a data generating mechanism (eg. normal distribution)
+* draw a random sample from that data generating mechanism 
+* analyze the sample (eg. compute sample mean)
+* repeat 
+* understand the analysis approach under repeated sampling 
+
+Simulations are natural in the context of iteration 
+
+write a function to
+
+* define data generating mechanism 
+* draw a sample 
+* analyze the sample 
+* return object of interest
+* use a loop to analyze this many times 
+
+```{r}
+library(tidyverse)
+
+set.seed(1)
+```
+
